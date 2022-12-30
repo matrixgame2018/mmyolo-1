@@ -5,10 +5,8 @@
 以 MMDetection 为例，如果想利用 [print_config.py](https://github.com/open-mmlab/mmdetection/blob/3.x/tools/misc/print_config.py)，你可以直接采用如下命令，而无需复制源码到 MMYOLO 库中。
 
 ```shell
-mim run mmdet print_config [CONFIG]
+mim run mmdet print_config ${CONFIG}
 ```
-
-**注意**：上述命令能够成功的前提是 MMDetection 库必须通过 MIM 来安装。
 
 ## 可视化
 
@@ -17,96 +15,121 @@ mim run mmdet print_config [CONFIG]
 脚本 `tools/analysis_tools/browse_coco_json.py` 能够使用可视化显示 COCO 标签在图片的情况。
 
 ```shell
-python tools/analysis_tools/browse_coco_json.py ${DATA_ROOT} \
-                                                [--ann_file ${ANN_FILE}] \
-                                                [--img_dir ${IMG_DIR}] \
+python tools/analysis_tools/browse_coco_json.py [--data-root ${DATA_ROOT}] \
+                                                [--img-dir ${IMG_DIR}] \
+                                                [--ann-file ${ANN_FILE}] \
                                                 [--wait-time ${WAIT_TIME}] \
                                                 [--disp-all] [--category-names CATEGORY_NAMES [CATEGORY_NAMES ...]] \
                                                 [--shuffle]
 ```
+
+其中，如果图片、标签都在同一个文件夹下的话，可以指定 `--data-root` 到该文件夹，然后 `--img-dir` 和 `--ann-file` 指定该文件夹的相对路径，代码会自动拼接。
+如果图片、标签文件不在同一个文件夹下的话，则无需指定 `--data-root` ，直接指定绝对路径的 `--img-dir` 和 `--ann-file` 即可。
 
 例子：
 
 1. 查看 `COCO` 全部类别，同时展示 `bbox`、`mask` 等所有类型的标注：
 
 ```shell
-python tools/analysis_tools/browse_coco_json.py './data/coco/' \
-                                                --ann_file 'annotations/instances_train2017.json' \
-                                                --img_dir 'train2017' \
+python tools/analysis_tools/browse_coco_json.py --data-root './data/coco' \
+                                                --img-dir 'train2017' \
+                                                --ann-file 'annotations/instances_train2017.json' \
+                                                --disp-all
+```
+
+如果图片、标签不在同一个文件夹下的话，可以使用绝对路径：
+
+```shell
+python tools/analysis_tools/browse_coco_json.py --img-dir '/dataset/image/coco/train2017' \
+                                                --ann-file '/label/instances_train2017.json' \
                                                 --disp-all
 ```
 
 2. 查看 `COCO` 全部类别，同时仅展示 `bbox` 类型的标注，并打乱显示：
 
 ```shell
-python tools/analysis_tools/browse_coco_json.py './data/coco/' \
-                                                --ann_file 'annotations/instances_train2017.json' \
-                                                --img_dir 'train2017' \
+python tools/analysis_tools/browse_coco_json.py --data-root './data/coco' \
+                                                --img-dir 'train2017' \
+                                                --ann-file 'annotations/instances_train2017.json' \
                                                 --shuffle
 ```
 
 3. 只查看 `bicycle` 和 `person` 类别，同时仅展示 `bbox` 类型的标注：
 
 ```shell
-python tools/analysis_tools/browse_coco_json.py './data/coco/' \
-                                                --ann_file 'annotations/instances_train2017.json' \
-                                                --img_dir 'train2017' \
+python tools/analysis_tools/browse_coco_json.py --data-root './data/coco' \
+                                                --img-dir 'train2017' \
+                                                --ann-file 'annotations/instances_train2017.json' \
                                                 --category-names 'bicycle' 'person'
 ```
 
 4. 查看 `COCO` 全部类别，同时展示 `bbox`、`mask` 等所有类型的标注，并打乱显示：
 
 ```shell
-python tools/analysis_tools/browse_coco_json.py './data/coco/' \
-                                                --ann_file 'annotations/instances_train2017.json' \
-                                                --img_dir 'train2017' \
+python tools/analysis_tools/browse_coco_json.py --data-root './data/coco' \
+                                                --img-dir 'train2017' \
+                                                --ann-file 'annotations/instances_train2017.json' \
                                                 --disp-all \
                                                 --shuffle
 ```
 
 ### 可视化数据集
 
-脚本 `tools/analysis_tools/browse_dataset.py` 能够帮助用户去直接窗口可视化数据集的原始图片+展示标签的图片，或者保存可视化图片到指定文件夹内。
-
-```shell
-python tools/analysis_tools/browse_dataset.py ${CONFIG} \
-                                              [-h] \
-                                              [--output-dir ${OUTPUT_DIR}] \
-                                              [--not-show] \
-                                              [--show-interval ${SHOW_INTERVAL}]
+```
+python tools/analysis_tools/browse_dataset.py \
+    ${CONFIG_FILE} \
+    [-o, --output-dir ${OUTPUT_DIR}] \
+    [-p, --phase ${DATASET_PHASE}] \
+    [-n, --show-number ${NUMBER_IMAGES_DISPLAY}] \
+    [-i, --show-interval ${SHOW_INTERRVAL}] \
+    [-m, --mode ${DISPLAY_MODE}] \
+    [--cfg-options ${CFG_OPTIONS}]
 ```
 
-例子：
+**所有参数的说明**：
 
-1. 使用 `config` 文件 `configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py` 可视化图片，图片直接弹出显示，同时保存到目录 `work-dir/browse_dataset`：
-
-```shell
-python tools/analysis_tools/browse_dataset.py 'configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py' \
-                                               --output-dir 'work-dir/browse_dataset'
-```
-
-2. 使用 `config` 文件 `configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py` 可视化图片，图片直接弹出显示，每张图片持续 `10` 秒，同时保存到目录 `work-dir/browse_dataset`：
+- `config` : 模型配置文件的路径。
+- `-o, --output-dir`: 保存图片文件夹，如果没有指定，默认为 `'./output'`。
+- **`-p, --phase`**: 可视化数据集的阶段，只能为 `['train', 'val', 'test']` 之一，默认为 `'train'`。
+- **`-n, --show-number`**: 可视化样本数量。如果没有指定，默认展示数据集的所有图片。
+- **`-m, --mode`**: 可视化的模式，只能为 `['original', 'transformed', 'pipeline']` 之一。 默认为 `'transformed'`。
+- `--cfg-options` : 对配置文件的修改，参考[学习配置文件](./config.md)。
 
 ```shell
-python tools/analysis_tools/browse_dataset.py 'configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py' \
-                                               --output-dir 'work-dir/browse_dataset' \
-                                               --show-interval 10
+`-m, --mode` 用于设置可视化的模式，默认设置为 'transformed'。
+- 如果 `--mode` 设置为 'original'，则获取原始图片；
+- 如果 `--mode` 设置为 'transformed'，则获取预处理后的图片；
+- 如果 `--mode` 设置为 'pipeline'，则获得数据流水线所有中间过程图片。
 ```
 
-3. 使用 `config` 文件 `configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py` 可视化图片，图片直接弹出显示，每张图片持续 `10` 秒，图片不进行保存：
+**示例**：
+
+1. **'original'** 模式 ：
 
 ```shell
-python tools/analysis_tools/browse_dataset.py 'configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py' \
-                                               --show-interval 10
+python ./tools/analysis_tools/browse_dataset.py configs/yolov5/yolov5_balloon.py --phase val --output-dir tmp --mode original
 ```
 
-4. 使用 `config` 文件 `configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py` 可视化图片，图片不直接弹出显示，仅保存到目录 `work-dir/browse_dataset`：
+- `--phase val`: 可视化验证集, 可简化为 `-p val`;
+- `--output-dir tmp`: 可视化结果保存在 "tmp" 文件夹, 可简化为 `-o tmp`;
+- `--mode original`: 可视化原图, 可简化为 `-m original`;
+- `--show-number 100`: 可视化100张图，可简化为 `-n 100`;
+
+
+2.**'transformed'** 模式 ：
 
 ```shell
-python tools/analysis_tools/browse_dataset.py 'configs/yolov5/yolov5_s-v61_syncbn_8xb16-300e_coco.py' \
-                                               --output-dir 'work-dir/browse_dataset' \
-                                               --not-show
+python ./tools/analysis_tools/browse_dataset.py configs/yolov5/yolov5_balloon.py 
 ```
+
+3.**'pipeline'** 模式 ：
+
+```shell
+python ./tools/analysis_tools/browse_dataset.py configs/yolov5/yolov5_balloon.py -m pipeline
+```
+
+![9041866c28ffef58c2597bc8cf6c272](https://user-images.githubusercontent.com/45811724/204810831-0fbc7f1c-0951-4be1-a11c-491cf0d194f6.png)
+
 
 ### 可视化数据集分析
 
@@ -252,13 +275,14 @@ python tools/dataset_converters/yolo2coco.py /path/to/the/root/dir/of/your_datas
 ```shell
 python tools/misc/download_dataset.py --dataset-name coco2017
 python tools/misc/download_dataset.py --dataset-name voc2007
+python tools/misc/download_dataset.py --dataset-name voc2012
 python tools/misc/download_dataset.py --dataset-name lvis
 python tools/misc/download_dataset.py --dataset-name balloon [--save-dir ${SAVE_DIR}] [--unzip]
 ```
 
 ## 模型转换
 
-文件夹 `tools/analysis_tools/` 下的三个脚本能够帮助用户将对应YOLO官方的预训练模型中的键转换成 `MMYOLO` 格式，并使用 `MMYOLO` 对模型进行微调。
+文件夹 `tools/model_converters/` 下的六个脚本能够帮助用户将对应YOLO官方的预训练模型中的键转换成 `MMYOLO` 格式，并使用 `MMYOLO` 对模型进行微调。
 
 ### YOLOv5
 
@@ -350,7 +374,21 @@ python tools/analysis_tools/optimize_anchors.py ${CONFIG} \
 ## 提取 COCO 子集
 
 COCO2017 数据集训练数据集包括 118K 张图片，验证集包括 5K 张图片，数据集比较大。在调试或者快速验证程序是否正确的场景下加载 json 会需要消耗较多资源和带来较慢的启动速度，这会导致程序体验不好。
-`extract_subcoco.py` 脚本提供了切分指定张图片的功能，用户可以通过 `--num-img` 参数来得到指定图片数目的 COCO 子集，从而满足上述需求。
+
+`extract_subcoco.py` 脚本提供了按指定图片数量、类别、锚框尺寸来切分图片的功能，用户可以通过 `--num-img`, `--classes`, `--area-size` 参数来得到指定条件的 COCO 子集，从而满足上述需求。
+
+例如通过以下脚本切分图片：
+
+```shell
+python tools/misc/extract_subcoco.py \
+    ${ROOT} \
+    ${OUT_DIR} \
+    --num-img 20 \
+    --classes cat dog person \
+    --area-size small
+```
+
+会切分出 20 张图片，且这 20 张图片只会保留同时满足类别条件和锚框尺寸条件的标注信息, 没有满足条件的标注信息的图片不会被选择，保证了这 20 张图都是有 annotation info 的。
 
 注意： 本脚本目前仅仅支持 COCO2017 数据集，未来会支持更加通用的 COCO JSON 格式数据集
 
@@ -380,4 +418,16 @@ python tools/misc/extract_subcoco.py ${ROOT} ${OUT_DIR} --num-img 20 --use-train
 
 ```shell
 python tools/misc/extract_subcoco.py ${ROOT} ${OUT_DIR} --num-img 20 --use-training-set --seed 1
+```
+
+4. 按指定类别切分图片
+
+```shell
+python tools/misc/extract_subcoco.py ${ROOT} ${OUT_DIR} --classes cat dog person
+```
+
+5. 按指定锚框尺寸切分图片
+
+```shell
+python tools/misc/extract_subcoco.py ${ROOT} ${OUT_DIR} --area-size small
 ```
